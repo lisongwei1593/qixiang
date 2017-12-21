@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <title>江苏省气象局</title>
+    <link href="../Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/pretty.css" rel="stylesheet">
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/bootstrap-select.min.js"></script>
+    <script type="text/javascript" src="./js/require.min.js" data-main="js/main"></script>
+    <style>
+        html, body, #cesiumContainer {
+            width: 100%; height: 100%; margin: 0; padding: 0; overflow: hidden;background-color: #000000;
+        }
+        .cesium-viewer-bottom{
+            display: none;
+        }
+        #wai{
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+          }
+          #bottom_dock{
+            background-image: url(http://p04gycm6e.bkt.clouddn.com/%E6%A1%8651217.png);
+            background-size:100% 100%;
+            background-color: rgba(0,0,0,0);
+            color:white;
+            margin: 0 auto;  
+            z-index: 10;
+            width:1100px;
+            height: 114px;
+          }
+          #bottom_buttons{
+            height: 100%;
+            padding: 50px 100px;
+          }
+          .bottom_button{
+            float:left;
+            margin-right: 48px;
+          }
+          .button_icon{
+            padding-left: 28%;
+          }
+          .bottom_button a{
+            text-decoration:none; 
+            color:white;
+          }
+          #lefttop{
+            position: fixed;
+            top: 0;
+            background-image: url(http://p04gycm6e.bkt.clouddn.com/%E6%A1%864.png);
+            background-size:100% 100%;
+            background-color: rgba(0,0,0,0);
+            color:white;
+            margin: 0 auto;  
+            z-index: 10;
+            width:20%;
+            height: 30%;
+            /*display: none;*/
+          }
+          #lefttop .close_button{
+            position: absolute;
+            left: 81.5%;
+            top: 8%;
+          }
+          #lefttop .center_img{
+            position: absolute;
+            width: 65%;
+            left: 18%;
+            top: 29%;
+          }
+          #leftcenter{
+            position: fixed;
+            top: 30%;
+            background-image: url(http://p04gycm6e.bkt.clouddn.com/%E6%A1%864.png);
+            background-size:100% 100%;
+            background-color: rgba(0,0,0,0);
+            color:white;
+            margin: 0 auto;  
+            z-index: 10;
+            width:20%;
+            height: 30%;
+            /*display: none;*/
+          }
+          #leftcenter .close_button{
+            width: 70px;
+            position: relative;
+            left: 81.5%;
+            top: 3px;
+          }
+          #leftcenter .leftcenter_inner{
+            position: absolute;
+            top: 57px;
+            left:63px;
+            background-image: url(http://p04gycm6e.bkt.clouddn.com/%E7%9C%81%E8%83%8C%E6%99%AF.png);
+            background-size:100% 100%;
+            background-color: rgba(0,0,0,0);
+            width: 264px;
+            height: 61px;
+          }
+          #leftbottom{
+            position: fixed;
+            top: 60%;
+            background-image: url(./images/框1的副本.png);
+            background-size:100% 100%;
+            background-color: rgba(0,0,0,0);
+            color:white;
+            margin: 0 auto;  
+            z-index: 10;
+            width:600px;
+            height: 218px;
+            /*display: none;*/
+          }
+          #leftbottom .close_button{
+            width: 70px;
+            position: relative;
+            left: 85%;
+            top: 30px;
+          }
+          #righttop{
+            position: fixed;
+            top: 0;
+            right: 0px;
+            background-image: url(http://p04gycm6e.bkt.clouddn.com/%E6%A1%866.png);
+            background-size:100% 100%;
+            background-color: rgba(0,0,0,0);
+            color:white;
+            margin: 0 auto;  
+            z-index: 10;
+            width:20%;
+            height: 27%;
+          }
+          #centertop{
+			display: block;
+		    position: absolute;
+		    top: 0;
+		    left: 42%;
+		    margin-top: 10px;
+          }
+          #centerinnertop1{
+            background-image: url(./images/未标题-1.png);
+            background-size:100% 100%;
+            background-color: rgba(0,0,0,0);
+            color:white;
+            width: 140px;
+		    height: 50px;
+		    float: left;
+		    margin-right: 10px;
+		    line-height: 50px;
+		    text-align: center;
+          }
+          #centerinnertop2{
+            background-image: url(./images/未标题-1.png);
+            background-size:100% 100%;
+            background-color: rgba(0,0,0,0);
+            color:white;
+            width: 140px;
+		    height: 50px;
+		    float: right;
+		    line-height: 50px;
+		    text-align: center;
+          }
+          #righttop .close_button{
+            position: relative;
+            left: 59.5%;
+            top: 13px;
+          }
+          #righttop .center_img{
+            position: relative;
+            width: 75%;
+            left: 56px;
+            top: 16px;
+          }
+          /*隐藏视角控件*/
+          .cesium-viewer-navigationContainer{
+            display: none;
+          }
+    </style>
+</head>
+<script>
+    function onload(Cesium) {
+        
+        // viewer = new Cesium.Viewer('cesiumContainer')
+        viewer = new Cesium.Viewer('cesiumContainer', {
+        scene3DOnly:true,
+        imageryProvider :new Cesium.BingMapsImageryProvider({
+            url : 'https://dev.virtualearth.net',
+            key : 'IBwY6ACcudfjc0Y4MwEc~Es6AdBVjMidN1xqbSaMmIw~AqRA5nq2_9T9A-IHHfcfvmdUQo0bXYsBxDZMsBDTJ-HpzbJF431kDA1zRzgeDS8A',
+            mapStyle : Cesium.BingMapsStyle.AERIAL
+        })
+        });
+
+        
+        // var imageryLayers = viewer.imageryLayers;
+        // //初始化天地图全球中文注记服务，并添加至影像图层
+        // var labelImagery = new Cesium.TiandituImageryProvider({
+        // mapStyle : Cesium.TiandituMapsStyle.CIA_C//天地图全球中文注记服务（经纬度投影）
+        // });
+        // imageryLayers.addImageryProvider(labelImagery);
+        // $('#imageryOptions').change(function(){
+        // var value = $(this).val();
+        // var baseLayer = imageryLayers.get(1);
+        // //添加新的天地图服务
+        // imageryLayers.addImageryProvider(new Cesium.TiandituImageryProvider({
+        // mapStyle : Cesium.TiandituMapsStyle[value]
+        // }),1);
+        // //移除之前的图层
+        // imageryLayers.remove(baseLayer);
+        // });
+        // $('#loadingbar').remove();
+        viewer.dataSources.add(Cesium.KmlDataSource.load('./SampleData/kml/bianjie_province1219.kml',{
+            camera : viewer.scene.camera,
+            canvas : viewer.scene.canvas,
+            name : "bianjie_privince",
+            clampToGround:true
+        }));
+        // viewer.dataSources.add(Cesium.KmlDataSource.load('./SampleData/kml/bianjie_city_jiangsu.kml',{
+        //     camera : viewer.scene.camera,
+        //     canvas : viewer.scene.canvas,
+        //     name : "bianjie_city_jiangsu",
+        //     clampToGround:true
+        // }));
+        
+        viewer.camera.direction = {x: 0.30822325197357886, y: -0.8297234411862578, z: 0.4653573230205648};
+        viewer.camera.position = {x: -2843480.4629390575, y: 5970336.8270167345, z: 2909709.1966710384};
+
+        //添加卫星
+        var entity = viewer.entities.add({
+            id:"satellite1",
+            position : Cesium.Cartesian3.fromDegrees(118.796673, 32.071813, 300000.0),
+            billboard : {
+                image : 'http://p04gycm6e.bkt.clouddn.com/%E5%8D%AB%E6%98%9F1.png'
+            }
+        });
+        var province_entity = [];
+        var add_data_line = function(name,position,width,material,data,hMax,place_name){
+            // var glowingLine = viewer.entities.add({
+            //     name : name,
+            //     polyline : {
+            //         positions : Cesium.Cartesian3.fromDegreesArrayHeights(position),
+            //         width : width,
+            //         hMax:hMax,
+            //         //followSurface : true,
+            //         material :material,
+            //     }
+            // });
+            var one_list = [];
+            if(data){
+                var length = 300;
+                var evt = new Cesium.Event();
+                var animationObj = {
+                    type: 'time',
+                    stepsRange: {
+                        start: 0,
+                        end: 300
+                    },
+                    trails: 1,
+                    duration: 10,
+                    event:evt
+                };
+                var pp = []
+                var pp2 = []
+                for (var i = 0; i < length; ++i) {
+                    var lat = Cesium.Math.lerp(position[0], position[3], i / (length - 1));
+                    var lon = Cesium.Math.lerp(position[1], position[4], i / (length - 1));
+                    var height = Cesium.Math.lerp(position[2], position[5], i / (length - 1));
+                    var a = viewer.entities.add({
+                        position : Cesium.Cartesian3.fromDegrees(lat, lon, height),
+                        nameID:i,
+                        availability : new Cesium.TimeIntervalCollection(null,animationObj),
+                        point:{
+                            pixelSize: width-1,
+                            outlineWidth : 1,
+		                    color:Cesium.Color.fromBytes(214,255,221),
+		                    outlineColor:Cesium.Color.fromBytes(150,246,167),
+                        },
+                    });
+                    pp.push(lat);
+                    pp.push(lon);
+                    pp.push(height);
+                    one_list.push(a);
+                    // pp2.push(lat+0.01);
+                    // pp2.push(lon+0.01);
+                    // pp2.push(height);
+                }
+                var glowingLine = viewer.entities.add({
+                    name : name,
+                    id : "line_"+name,
+                    polyline : {
+                        positions : Cesium.Cartesian3.fromDegreesArrayHeights(pp),
+                        width : width,
+                        hMax:hMax,
+                        followSurface : true,
+                        material :material,
+                        depthFailMaterial: material,
+                        granularity:Cesium.Math.RADIANS_PER_DEGREE,
+                    }
+                });
+                one_list.push(glowingLine);
+                // var glowingLine = viewer.entities.add({
+                //     name : name,
+                //     polyline : {
+                //         positions : Cesium.Cartesian3.fromDegreesArrayHeights(pp2),
+                //         width : width,
+                //         hMax:hMax,
+                //         //followSurface : true,
+                //         material :material,
+                //     }
+                // });
+                for (var i = 0; i < length; ++i) {
+                    var lat = Cesium.Math.lerp(position[3], position[0], i / (length - 1));
+                    var lon = Cesium.Math.lerp(position[4], position[1], i / (length - 1));
+                    var height = Cesium.Math.lerp(position[5], position[2], i / (length - 1));
+                    var b = viewer.entities.add({
+                        position : Cesium.Cartesian3.fromDegrees(lat, lon, height),
+                        nameID:i,
+                        availability : new Cesium.TimeIntervalCollection(null,animationObj),
+                        point:{
+                            pixelSize: width-1,
+                            outlineWidth : 1,
+		                    color:Cesium.Color.fromBytes(214,255,221),
+		                    outlineColor:Cesium.Color.fromBytes(150,246,167),
+                        },
+                    });
+                    one_list.push(b);
+                }
+                //添加地名
+                if(name=="beijing"){
+                	var d_color = Cesium.Color.fromBytes(0,240,255);
+                }else{
+                	var d_color = Cesium.Color.fromBytes(56,253,0);
+                }
+                var c = viewer.entities.add({
+		            name:name,
+		            id : "place_"+name,
+		            position : Cesium.Cartesian3.fromDegrees(position[3],position[4]),
+		            point:{
+		                pixelSize: 10,
+		                color:d_color,
+		                disableDepthTestDistance:Number.POSITIVE_INFINITY,
+		            },
+		            label : {
+		                    text : place_name,
+		                    font: '16px sans-serif',
+		                    verticalOrigin :Cesium.VerticalOrigin.BOTTOM,
+		                    style:Cesium.LabelStyle.FILL_AND_OUTLINE,
+		                    outlineWidth : 3.0,
+		                    pixelOffset:new Cesium.Cartesian2(0, -10),
+		                    disableDepthTestDistance:Number.POSITIVE_INFINITY,
+		                    fillColor:Cesium.Color.fromBytes(255,255,255),
+		                    outlineColor:Cesium.Color.fromBytes(0,0,0),
+		                }
+	            });	
+	            one_list.push(c);
+            }else{
+            	var glowingLine = viewer.entities.add({
+                    name : name,
+                    polyline : {
+                        positions : Cesium.Cartesian3.fromDegreesArrayHeights(position),
+                        width : width,
+                        hMax:hMax,
+                        //followSurface : true,
+                        material :material,
+                    }
+                });
+                one_list.push(glowingLine);
+            }
+            var dic = new Array();
+        	dic[name] = one_list;
+            province_entity.push(dic);
+        };
+
+        //虚线
+        var dashmaterial = new Cesium.PolylineDashMaterialProperty({
+            glowPower : 0.2,
+            color : Cesium.Color.fromBytes(56,253,0)
+        });
+        //实线
+        var outlinematerial = new Cesium.PolylineOutlineMaterialProperty({
+            color : Cesium.Color.fromBytes(56,253,0),
+            outlineWidth : 3,
+            outlineColor : Cesium.Color.fromBytes(56,253,0)
+        });
+        var bejing_outlinematerial = new Cesium.PolylineOutlineMaterialProperty({
+            color : Cesium.Color.fromBytes(0,240,255),
+            outlineWidth : 3,
+            outlineColor : Cesium.Color.fromBytes(0,240,255)
+        });
+        //波状线
+        var dynamicmateral = new Cesium.PolylineDynamicMaterialProperty({
+            color : Cesium.Color.fromBytes(255,253,186),
+            outlineWidth : 0,
+            outlineColor : Cesium.Color.fromBytes(56,253,0)
+        });
+        var weixing_dashmaterial = new Cesium.PolylineDashMaterialProperty({
+            dashLength: 30,
+            color : Cesium.Color.fromBytes(255,246,100)
+        });
+        add_data_line("weixing",[118.796673, 32.071813, 300000.0,118.796673, 32.071813, 0.0],8,dynamicmateral,false,300000);
+        add_data_line("weixing1",[118.796673, 32.071813, 300000.0,118.796673, 32.071813, 0.0],4,weixing_dashmaterial,false,300000);
+        add_data_line("yancheng",[118.796673, 32.071813, 100.0, 120.171568,33.36668,100.0],4,outlinematerial,true,0,"盐城");
+        add_data_line("yangzhou",[118.796673, 32.071813, 100.0,119.424593,32.407506,100.0],4,outlinematerial,true,0,"扬州");
+        add_data_line("suzhou",[118.796673, 32.071813, 100.0,120.635531,31.317879,100.0],4,outlinematerial,true,0,"苏州");
+        add_data_line("xuzhou",[118.796673, 32.071813, 100.0,117.198589,34.273783,100.0],4,outlinematerial,true,0,"徐州");
+        add_data_line("beijing",[118.796673, 32.071813, 100.0,116.414617,39.928658,100],8,bejing_outlinematerial,true,0,"北京");
+        add_data_line("lianyungang",[118.796673, 32.071813, 100.0,119.204475,34.602725,100.0],4,outlinematerial,true,0,"连云港");
+        add_data_line("suqian",[118.796673, 32.071813, 100.0,118.297672,33.963918,100.0],4,outlinematerial,true,0,"宿迁");
+        add_data_line("huaian",[118.796673, 32.071813, 100.0,119.038731,33.65525,100.0],4,outlinematerial,true,0,"淮安");
+        add_data_line("taizhou",[118.796673, 32.071813, 100.0,119.933015,32.460675,100.0],4,outlinematerial,true,0,"泰州");
+        add_data_line("changzhou",[118.796673, 32.071813, 100.0,119.980335,31.814323,100.0],4,outlinematerial,true,0,"常州");
+        add_data_line("zhenjiang",[118.796673, 32.071813, 100.0,119.428189,32.204493,100.0],4,outlinematerial,true,0,"镇江");
+        add_data_line("nantong",[118.796673, 32.071813,100.0,120.902742,31.997329,100.0],4,outlinematerial,true,0,"南通");
+        add_data_line("wuxi",[118.796673, 32.071813, 100.0,120.311684,31.582519,100.0],4,outlinematerial,true,0,"无锡");
+
+
+							
+        var add_place_name = function(name,lat,lon){
+            viewer.entities.add({
+            name:name,
+            id: "place_nanjing",
+            position : Cesium.Cartesian3.fromDegrees(lat,lon),
+            point:{
+                pixelSize: 10,
+                color:Cesium.Color.fromBytes(56,253,0),
+                disableDepthTestDistance:Number.POSITIVE_INFINITY,
+            },
+            label : {
+                    text : name,
+                    font: '16px sans-serif',
+                    verticalOrigin :Cesium.VerticalOrigin.TOP,
+                    style:Cesium.LabelStyle.FILL_AND_OUTLINE,
+                    outlineWidth : 3.0,
+                    pixelOffset:new Cesium.Cartesian2(0, 10),
+                    disableDepthTestDistance:Number.POSITIVE_INFINITY,
+                    fillColor:Cesium.Color.fromBytes(255,255,255),
+                    outlineColor:Cesium.Color.fromBytes(0,0,0),
+                }
+            });
+        }
+
+        add_place_name('南京',118.796673, 32.071813);
+        // add_place_name('北京',116.414617,39.928658);
+        // add_place_name('盐城',120.171568,33.36668);
+        // add_place_name('扬州',119.424593,32.407506);
+        // add_place_name('苏州',120.635531,31.317879);
+        // add_place_name('徐州',117.198589,34.273783);
+        var county_name_dict = {
+        	"xuzhou":xuzhou_country,
+        }
+        var yancheng_country = [];
+        var suzhou_country = [];
+        var yangzhou_country = [];
+        var xuzhou_country = [];
+        var lianyungang_country = [];
+        var suqian_country = [];
+        var huaian_country = [];
+        var nantong_country = [];
+        var taizhou_country = [];
+        var changzhou_country = [];
+        var wuxi_country = [];
+        var zhenjiang_country = [];
+
+        var add_sanshe_line = function(lat,lon,height,c_lat,c_lon,c_height,country_list,name){
+            var pp = []
+            var length = 30
+            var evt = new Cesium.Event();
+            var animationObj = {
+                    type: 'time',
+                    stepsRange: {
+                        start: 0,
+                        end: 30
+                    },
+                    trails: 1,
+                    duration: 50,
+                    event:evt
+                };
+            // for (var i = 0; i < length; ++i) {
+            //     var lat = Cesium.Math.lerp(lat, c_lat, i / (length - 1));
+            //     var lon = Cesium.Math.lerp(lon,c_lon, i / (length - 1));
+            //     var height = Cesium.Math.lerp(height, c_height, i / (length - 1));
+            //     pp.push(lat);
+            //     pp.push(lon);
+            //     pp.push(height);
+            // }
+			for (var i = 0; i < length; ++i) {
+			    var lat = Cesium.Math.lerp(lat, c_lat, i / (length - 1));
+			    var lon = Cesium.Math.lerp(lon,c_lon, i / (length - 1));
+			    var height = Cesium.Math.lerp(height, c_height, i / (length - 1));
+			    var flow_point = viewer.entities.add({
+			        position : Cesium.Cartesian3.fromDegrees(lat, lon, height),
+			        nameID:i,
+			        show:false,
+			        availability : new Cesium.TimeIntervalCollection(null,animationObj),
+			        point:{
+			            pixelSize: 4,
+			            outlineWidth : 1,
+			            color:Cesium.Color.fromBytes(214,255,221),
+			            outlineColor:Cesium.Color.fromBytes(150,246,167),
+			        },
+			    });
+			    pp.push(lat);
+			    pp.push(lon);
+			    pp.push(height);
+			    country_list.push(flow_point);
+			}
+
+            var polyline_county = viewer.entities.add({
+                name : 'sansheline',
+                show:false,
+                polyline : {
+                    positions : Cesium.Cartesian3.fromDegreesArrayHeights(pp),
+                    width : 2,
+                    material : Cesium.Color.fromBytes(56,253,0)
+                },
+            });
+            // var point_county = viewer.entities.add({
+            //     position : Cesium.Cartesian3.fromDegrees(c_lat,c_lon),
+            //     show:false,
+            //     point:{
+            //         pixelSize: 6,
+            //         disableDepthTestDistance:Number.POSITIVE_INFINITY,
+            //         color:Cesium.Color.fromBytes(56,253,0),
+            //         outlineColor:Cesium.Color.fromBytes(56,253,0),
+            //     }
+            // });
+            var country_label = viewer.entities.add({
+	            name:name,
+	            show:false,
+	            id : "place_"+name,
+	            position : Cesium.Cartesian3.fromDegrees(c_lat,c_lon),
+	            point:{
+	                pixelSize: 6,
+	                color:Cesium.Color.fromBytes(56,253,0),
+	                outlineColor:Cesium.Color.fromBytes(56,253,0),
+	                disableDepthTestDistance:Number.POSITIVE_INFINITY,
+	            },
+	            label : {
+	                    text : name,
+	                    font: '12px sans-serif',
+	                    verticalOrigin :Cesium.VerticalOrigin.BOTTOM,
+	                    style:Cesium.LabelStyle.FILL_AND_OUTLINE,
+	                    outlineWidth : 3.0,
+	                    pixelOffset:new Cesium.Cartesian2(0, -10),
+	                    disableDepthTestDistance:Number.POSITIVE_INFINITY,
+	                    fillColor:Cesium.Color.fromBytes(255,255,255),
+	                    outlineColor:Cesium.Color.fromBytes(0,0,0),
+	                }
+            });	
+            country_list.push(polyline_county);
+            country_list.push(country_label);
+        }
+        
+        // 徐州
+        add_sanshe_line(117.198589,34.273783,20.0,116.603732,34.702619,20.0,xuzhou_country,"丰县");//丰县
+        add_sanshe_line(117.198589,34.273783,20.0,116.944082,34.765272,20.0,xuzhou_country,"沛县");//沛县
+        add_sanshe_line(117.198589,34.273783,20.0,117.17557,34.1861,20.0,xuzhou_country,"铜山");//铜山
+        add_sanshe_line(117.198589,34.273783,20.0,117.965711,34.324013,20.0,xuzhou_country,"邳州");//邳州
+        add_sanshe_line(117.198589,34.273783,20.0,117.946858,33.919268,20.0,xuzhou_country,"睢宁");//睢宁
+        add_sanshe_line(117.198589,34.273783,20.0,118.356938,34.377995,20.0,xuzhou_country,"新沂");//新沂
+        // 苏州
+        add_sanshe_line(120.635531,31.317879,20.0,120.622305,31.342818,20.0,suzhou_country,"姑苏");//姑苏
+        add_sanshe_line(120.635531,31.317879,20.0,120.637904,31.267987,20.0,suzhou_country,"吴中");//吴中
+        add_sanshe_line(120.635531,31.317879,20.0,120.649115,31.374845,20.0,suzhou_country,"相城");//相城
+        add_sanshe_line(120.635531,31.317879,20.0,120.653292,31.144644,20.0,suzhou_country,"吴江");//吴江
+        add_sanshe_line(120.635531,31.317879,20.0,120.585003,31.337987,20.0,suzhou_country,"虎丘");//虎丘
+        add_sanshe_line(120.635531,31.317879,20.0,120.760071,31.658063,20.0,suzhou_country,"常熟");//常熟
+        add_sanshe_line(120.635531,31.317879,20.0,120.561554,31.882122,20.0,suzhou_country,"张家港");//张家港
+        add_sanshe_line(120.635531,31.317879,20.0,120.989177,31.391356,20.0,suzhou_country,"昆山");//昆山
+        add_sanshe_line(120.635531,31.317879,20.0,121.13617,31.465585,20.0,suzhou_country,"太仓");//太仓
+        // 盐城
+        add_sanshe_line(120.171568,33.36668,20.0,120.205728,33.396375,20.0,yancheng_country,"宁湖");//宁湖
+        add_sanshe_line(120.171568,33.36668,20.0,120.160309,33.344757,20.0,yancheng_country,"盐都");//盐都
+        add_sanshe_line(120.171568,33.36668,20.0,120.506864,33.204277,20.0,yancheng_country,"大丰");//大丰
+        add_sanshe_line(120.171568,33.36668,20.0,120.327112,32.873686,20.0,yancheng_country,"东台");//东台
+        add_sanshe_line(120.171568,33.36668,20.0,120.266746,33.781494,20.0,yancheng_country,"射阳");//射阳
+        add_sanshe_line(120.171568,33.36668,20.0,119.806681,33.471761,20.0,yancheng_country,"建湖");//建湖
+        add_sanshe_line(120.171568,33.36668,20.0,119.811881,33.764599,20.0,yancheng_country,"阜宁");//阜宁
+        add_sanshe_line(120.171568,33.36668,20.0,119.828196,33.995647,20.0,yancheng_country,"滨海");//滨海
+        add_sanshe_line(120.171568,33.36668,20.0,119.584601,34.205698,20.0,yancheng_country,"响水");//响水
+        // 扬州
+      	add_sanshe_line(119.424593,32.407506,20.0,119.577753,32.43932,20.0,yangzhou_country,"江都");//江都
+        add_sanshe_line(119.424593,32.407506,20.0,119.190892,32.27809,20.0,yangzhou_country,"仪征");//仪征
+        add_sanshe_line(119.424593,32.407506,20.0,119.465041,32.786661,20.0,yangzhou_country,"高邮");//高邮
+        add_sanshe_line(119.424593,32.407506,20.0,119.365556,33.247688,20.0,yangzhou_country,"宝应");//宝应
+        add_sanshe_line(119.424593,32.407506,20.0,119.405535,32.382751,20.0,yangzhou_country,"邗江区");//邗江区
+        add_sanshe_line(119.424593,32.407506,20.0,119.412032,32.447291,20.0,yangzhou_country,"维扬区");//维扬区
+        add_sanshe_line(119.424593,32.407506,20.0,119.485073,32.415293,20.0,yangzhou_country,"广陵区");//广陵区
+		// 连云港
+      	add_sanshe_line(119.204475,34.602725,20.0,119.175328,34.61862,20.0,lianyungang_country,"新浦区");//新浦区
+        add_sanshe_line(119.204475,34.602725,20.0,119.346588,34.765811,20.0,lianyungang_country,"连云区");//连云区
+        add_sanshe_line(119.204475,34.602725,20.0,119.168833,34.576029,20.0,lianyungang_country,"海州区");//海州区
+        add_sanshe_line(119.204475,34.602725,20.0,119.179756,34.848546,20.0,lianyungang_country,"赣榆区");//赣榆区
+        add_sanshe_line(119.204475,34.602725,20.0,119.247109,34.288616,20.0,lianyungang_country,"灌云县");//灌云县
+        add_sanshe_line(119.204475,34.602725,20.0,118.76014,34.547443,20.0,lianyungang_country,"东海县");//东海县
+        add_sanshe_line(119.204475,34.602725,20.0,119.323113,34.093069,20.0,lianyungang_country,"灌南县");//灌南县
+        // 宿迁
+        add_sanshe_line(118.297672,33.963918,20.0,118.809844,34.118889,20.0,suqian_country,"沭阳县");//沭阳县
+        add_sanshe_line(118.297672,33.963918,20.0,118.710041,33.729289,20.0,suqian_country,"泗阳县");//泗阳县
+        add_sanshe_line(118.297672,33.963918,20.0,118.222991,33.466215,20.0,suqian_country,"泗洪县");//泗洪县
+        add_sanshe_line(118.297672,33.963918,20.0,118.248992,33.968678,20.0,suqian_country,"宿城区");//宿城区
+        add_sanshe_line(118.297672,33.963918,20.0,118.337551,33.954804,20.0,suqian_country,"宿豫区");//宿豫区
+        // 淮安
+        add_sanshe_line(119.038731,33.65525,20.0,119.034139,33.558562,20.0,huaian_country,"清江浦区");//清江浦区
+        add_sanshe_line(119.038731,33.65525,20.0,119.170673,33.530652,20.0,huaian_country,"楚州区");//楚州区
+        add_sanshe_line(119.038731,33.65525,20.0,119.041422,33.63815,20.0,huaian_country,"淮阴区");//淮阴区
+        add_sanshe_line(119.038731,33.65525,20.0,119.027044,33.031768,20.0,huaian_country,"金湖县");//金湖县
+        add_sanshe_line(119.038731,33.65525,20.0,118.551441,33.018739,20.0,huaian_country,"盱眙县");//盱眙县
+        add_sanshe_line(119.038731,33.65525,20.0,118.87104,33.307616,20.0,huaian_country,"洪泽区");//洪泽区
+        add_sanshe_line(119.038731,33.65525,20.0,119.267598,33.787079,20.0,huaian_country,"涟水县");//涟水县
+        // 南通
+        add_sanshe_line(120.902742,31.997329,20.0,120.86342,32.015923,20.0,nantong_country,"崇川区");//崇川区
+        add_sanshe_line(120.902742,31.997329,20.0,120.823877,32.037345,20.0,nantong_country,"港闸区");//港闸区
+        add_sanshe_line(120.902742,31.997329,20.0,121.082,32.070356,20.0,nantong_country,"通州区");//通州区
+        add_sanshe_line(120.902742,31.997329,20.0,120.473283,32.54017,20.0,nantong_country,"海安县");//海安县
+        add_sanshe_line(120.902742,31.997329,20.0,121.191863,32.337826,20.0,nantong_country,"如东县");//如东县
+        add_sanshe_line(120.902742,31.997329,20.0,121.662899,31.814233,20.0,nantong_country,"启东市");//启东市
+        add_sanshe_line(120.902742,31.997329,20.0,120.579466,32.378827,20.0,nantong_country,"如皋市");//如皋市
+        add_sanshe_line(120.902742,31.997329,20.0,121.185561,31.874103,20.0,nantong_country,"海门市");//海门市
+        // 泰州
+        add_sanshe_line(119.933015,32.460675,20.0,119.9261,32.496732,20.0,taizhou_country,"海陵区");//海陵区
+        add_sanshe_line(119.933015,32.460675,20.0,119.887271,32.327303,20.0,taizhou_country,"高港区");//高港区
+        add_sanshe_line(119.933015,32.460675,20.0,120.284682,31.98817,20.0,taizhou_country,"靖江市");//靖江市
+        add_sanshe_line(119.933015,32.460675,20.0,120.058599,32.178452,20.0,taizhou_country,"泰兴市");//泰兴市
+        add_sanshe_line(119.933015,32.460675,20.0,120.134548,32.515721,20.0,taizhou_country,"姜堰区");//姜堰区
+        add_sanshe_line(119.933015,32.460675,20.0,119.856939,32.920734,20.0,taizhou_country,"兴化市");//兴化市
+        // 常州
+        add_sanshe_line(119.980335,31.814323,20.0,119.979888,31.792445,20.0,changzhou_country,"天宁区");//天宁区
+        add_sanshe_line(119.980335,31.814323,20.0,119.907313,31.807647,20.0,changzhou_country,"钟楼区");//钟楼区
+        add_sanshe_line(119.980335,31.814323,20.0,120.049315,31.741531,20.0,changzhou_country,"戚墅堰区");//戚墅堰区
+        add_sanshe_line(119.980335,31.814323,20.0,119.978025,31.8368,20.0,changzhou_country,"新北区");//新北区
+        add_sanshe_line(119.980335,31.814323,20.0,119.949279,31.708114,20.0,changzhou_country,"武进区");//武进区
+        add_sanshe_line(119.980335,31.814323,20.0,119.603996,31.728402,20.0,changzhou_country,"金坛区");//金坛区
+        add_sanshe_line(119.980335,31.814323,20.0,119.492656,31.422102,20.0,changzhou_country,"溧阳市");//溧阳市
+        // 无锡
+        add_sanshe_line(120.311684,31.582519,20.0,120.303664,31.580417,20.0,wuxi_country,"崇安区");//崇安区
+        add_sanshe_line(120.311684,31.582519,20.0,120.328495,31.550222,20.0,wuxi_country,"南长区");//南长区
+        add_sanshe_line(120.311684,31.582519,20.0,119.82965,31.343714,20.0,wuxi_country,"宜兴市");//宜兴市
+        add_sanshe_line(120.311684,31.582519,20.0,120.290993,31.927026,20.0,wuxi_country,"江阴市");//江阴市
+        add_sanshe_line(120.311684,31.582519,20.0,120.291281,31.534896,20.0,wuxi_country,"滨湖区");//滨湖区
+        add_sanshe_line(120.311684,31.582519,20.0,120.363426,31.595746,20.0,wuxi_country,"锡山区");//锡山区
+        add_sanshe_line(120.311684,31.582519,20.0,120.305934,31.687234,20.0,wuxi_country,"惠山区");//惠山区
+        add_sanshe_line(120.311684,31.582519,20.0,120.297558,31.609683,20.0,wuxi_country,"北塘区");//北塘区
+        // 镇江
+        add_sanshe_line(119.428189,32.204493,20.0,119.613076,32.0169,20.0,zhenjiang_country,"丹阳市");//丹阳市
+        add_sanshe_line(119.428189,32.204493,20.0,119.80237,32.242478,20.0,zhenjiang_country,"扬中市");//扬中市
+        add_sanshe_line(119.428189,32.204493,20.0,119.172558,31.951903,20.0,zhenjiang_country,"句容市");//句容市
+        add_sanshe_line(119.428189,32.204493,20.0,119.439926,32.137431,20.0,zhenjiang_country,"丹徒区");//丹徒区
+        add_sanshe_line(119.428189,32.204493,20.0,119.475029,32.203296,20.0,zhenjiang_country,"京口区");//京口区
+        add_sanshe_line(119.428189,32.204493,20.0,119.416715,32.201495,20.0,zhenjiang_country,"润州区");//润州区
+        add_sanshe_line(119.428189,32.204493,20.0,119.670994,32.177809,20.0,zhenjiang_country,"镇江新区");//镇江新区
+
+        var county_name_dict = {
+        	"yancheng":yancheng_country,
+			"suzhou":suzhou_country,
+			"yangzhou":yangzhou_country,
+			"xuzhou":xuzhou_country,
+			"lianyungang":lianyungang_country,
+			"suqian":suqian_country,
+			"huaian":huaian_country,
+			"nantong":nantong_country,
+			"taizhou":taizhou_country,
+			"changzhou":changzhou_country,
+			"wuxi":wuxi_country,
+			"zhenjiang":zhenjiang_country,
+        }
+        var current_country = 1;
+        
+ 		// var add_sanshe_line = function(lat,lon,c_lat,c_lon){
+
+ 		// }
+        // var glowingLine = viewer.entities.add({
+        //     name : name,
+        //     id : "line_"+name,
+        //     polyline : {
+        //         positions : Cesium.Cartesian3.fromDegreesArrayHeights([117.198589,34.273783,20.0,118.354638,34.387528,20.0]),
+        //         width : 2,
+        //         hMax:10000,
+        //         followSurface : true,
+        //         material :Cesium.Color.fromBytes(56,253,0),
+        //         depthFailMaterial: Cesium.Color.fromBytes(56,253,0),
+        //         granularity:Cesium.Math.RADIANS_PER_DEGREE,
+        //     }
+        // });
+        // var pp = viewer.entities.add({
+        //     name:name,
+        //     id : "place_"+name,
+        //     position : Cesium.Cartesian3.fromDegrees(118.354638,34.387528),
+        //     point:{
+        //         pixelSize: 7,
+        //         color:Cesium.Color.fromBytes(56,253,0),
+        //         disableDepthTestDistance:Number.POSITIVE_INFINITY,
+        //     },
+        // });	
+	    
+
+
+        // var xuzhou_position = [];
+        // var xuzhou_xinqi = new Cesium.Entity({
+        // 	show: true,
+        //     name : 'xinqi',
+        //     polyline : {
+        //         positions : Cesium.Cartesian3.fromDegreesArrayHeights([117.198589,34.273783,20.0,118.354638,34.387528,20.0]),
+        //         width : 2,
+        //         material : Cesium.Color.fromBytes(56,253,0)
+        //     },
+        // });
+        // xuzhou_position.push(xuzhou_xinqi);
+        // viewer.entities.add(xuzhou_xinqi);
+        // var xuzhou_pixian = new Cesium.Entity({
+        // 	show: true,
+        //     name : 'pixian',
+        //     polyline : {
+        //         positions : Cesium.Cartesian3.fromDegreesArray([117.198589,34.273783,20.0,117.964636,34.323368,20.0]),
+        //         width : 3,
+        //         material : Cesium.Color.fromBytes(56,253,0)
+        //     },
+        // });
+        // xuzhou_position.push(xuzhou_pixian);
+        // viewer.entities.add(xuzhou_pixian);
+
+        var city_position = {
+        					"yancheng":[120.171568,33.36668,350000.0],
+        					"suzhou":[120.635531,31.317879,350000.0],
+        					"nanjing":[118.796673, 32.071813,350000.0],
+        					"yangzhou":[119.424593,32.407506,350000.0],
+        					"xuzhou":[117.198589,34.273783,350000.0],
+        					"lianyungang":[119.204475,34.602725,350000.0],
+        					"suqian":[118.297672,33.963918,350000.0],
+        					"huaian":[119.038731,33.65525,350000.0],
+        					"nantong":[120.902742,31.997329,350000.0],
+        					"taizhou":[119.933015,32.460675,350000.0],
+        					"changzhou":[119.980335,31.814323,350000.0],
+        					"wuxi":[120.311684,31.582519,350000.0],
+        					"zhenjiang":[119.428189,32.204493,350000.0],
+        				};
+        //设置鼠标点击事件
+        var scene = viewer.scene;
+        handler = new Cesium.ScreenSpaceEventHandler(scene.canvas);
+    	handler.setInputAction(function(movement) {
+    		if(viewer.camera.positionCartographic.height>500000){
+    			var ss = viewer.dataSources.get(1);
+            	viewer.dataSources.remove(ss);
+            	popups = document.getElementsByClassName("popup");
+                for (var i = 0; i < popups.length; i++) {
+                    popups[i].style.display="block";
+                }
+                for (var i = 0; i < current_country.length; i++) {
+                    current_country[i].show=false;
+                }
+                for(var j=0;j<province_entity.length;j++){
+	            	for(var a in province_entity[j]){
+            			var one_list = province_entity[j][a];
+            			for(var i=0;i<one_list.length;i++){
+            				one_list[i].show=true;
+            			}
+	            	}
+	            };
+    		}else{
+    	// 		var ss = viewer.dataSources.get(1);
+    	// 		if(typeof(ss) == "undefined"){
+    	// 			var url = './SampleData/kml/bianjie_city_jiangsu.kml';
+					// viewer.dataSources.add(Cesium.KmlDataSource.load(url,{
+			  //           camera : viewer.scene.camera,
+			  //           canvas : viewer.scene.canvas,
+			  //           name : "bianjie_city_jiangsu",
+			  //           clampToGround:true
+			  //       }));
+    	// 		}
+    		}
+    	}, Cesium.ScreenSpaceEventType.WHEEL);
+    	var testlala = function(){
+    		// viewer.camera.direction = {x: 0.49009816385804705, y: -0.7986150729587858, z: 0.3493103992525909};
+    		// viewer.camera.position = {x: -2733108.7862079963, y: 4862072.56189461, z: 3499776.251513679};
+    	}
+        viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {        	
+            // Pick a new feature
+            var pickedFeature = viewer.scene.pick(movement.position);
+           
+            if(typeof(pickedFeature) == "undefined"){
+                // close_popups();
+                return ; 
+            }else{
+            	var name = pickedFeature.id.name;
+            	var clickable = ["xuzhou","suqian","lianyungang","huaian","yancheng","yangzhou","taizhou","zhenjiang","changzhou","nantong","wuxi","suzhou"];
+            	var index = clickable.indexOf(name);
+            	if(index==-1){
+            		return;
+            	}
+            	//关闭当前区县信息
+            	for (var i = 0; i < current_country.length; i++) {
+	                current_country[i].show=false;
+	            }
+	            //关闭区县无关信息
+	            
+	            for(var j=0;j<province_entity.length;j++){
+	            	for(var a in province_entity[j]){
+	            		if(a==name){
+	            			console.log(1);
+	            		}else{
+	            			var one_list = province_entity[j][a];
+	            			for(var i=0;i<one_list.length;i++){
+	            				one_list[i].show=false;
+	            			}
+	            		}
+	            	}
+	            };
+            	//显示市边界
+            	var url = './SampleData/kml/bianjie_city_jiangsu1217.kml';
+				viewer.dataSources.add(Cesium.KmlDataSource.load(url,{
+		            camera : viewer.scene.camera,
+		            canvas : viewer.scene.canvas,
+		            name : "bianjie_city_jiangsu",
+		            clampToGround:true
+		        }));
+		        //镜头聚焦
+            	viewer.camera.flyTo({
+				    destination : Cesium.Cartesian3.fromDegrees(city_position[name][0],city_position[name][1], city_position[name][2]),
+				    complete:testlala,
+				});
+				//显示区县连线
+		        current_country = county_name_dict[name];
+		        for (var i = 0; i < current_country.length; i++) {
+                    current_country[i].show=true;
+                }
+                //关闭所有弹窗
+		        // popups = document.getElementsByClassName("popup");
+          //       for (var i = 0; i < popups.length; i++) {
+          //           popups[i].style.display="none";
+          //       }
+            }            
+        }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+        viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
+            	
+        }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+        //viewer.camera.positionCartographic相机高度
+        // viewer.screenSpaceEventHandler.setInputAction(function onLeftClick(movement) {
+            
+        // }, Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
+        
+    }
+    function close_popups(id){
+        popup = document.getElementById(id);
+        popup.style.display="none";
+        // popups = document.getElementsByClassName("popup");
+        // for (var i = 0; i < popups.length; i++) {
+        //     popups[i].style.display="none";
+        // }
+    }
+</script>
+<body>
+<div id="cesiumContainer"></div>
+<div class="popup"></div>
+<div id="lefttop" class="popup" style="display: block;">
+    <div style="position: absolute;top: 6%;left: 18%;font-size: 13px;"><span>江苏省气象局</span></div>
+    <div class="close_button" onclick="close_popups('lefttop')" style="z-index: 200"><img src="./images/关闭2.png"></div>
+    <div class="center_img" ><img class="center_img" src="http://p04gycm6e.bkt.clouddn.com/c1.png"></div>
+    <div style="width: 100%;position: absolute;height: 100%;">
+      <span style=" position: absolute;top: 30%;left: 12%;font-size: 12px;color: #b4e4fa;">今日文件总数</span><span style="position: absolute;top: 37%;left: 22%;font-size: 20px">235</span>
+      <span style=" position: absolute;top: 30%;left: 71%;font-size: 12px;color: #b4e4fa;">接收文件总数</span><span style="position: absolute;top: 37%;left: 71%;font-size: 20px">679</span>
+      <span style=" position: absolute;top: 62%;left: 70%;font-size: 12px;color: #b4e4fa;">入库总数</span><span style="position: absolute;top: 69%;left: 70%;font-size: 20px">967</span>
+    </div>
+</div> 
+<div id="leftcenter" class="popup" style="display: block">
+    <div style="position: relative;top: 17px;left: 68px;font-size: 13px;"><span>江苏省气象局</span></div>
+    <div class="close_button" onclick="close_popups('leftcenter')"><img src="./images/关闭2.png"></div>
+    <div class="leftcenter_inner" style="top: 57px;"><div style="padding-top: 23px;padding-left: 60px;font-size: 15px"><span>获取文件数</span>　<span>2196</span></div></div>
+    <div class="leftcenter_inner" style="top: 117px;"><div style="padding-top: 23px;padding-left: 60px;font-size: 15px"><span>迟到文件数</span>　<span>593</span></div></div>
+    <div class="leftcenter_inner" style="top: 177px;"><div style="padding-top: 23px;padding-left: 60px;font-size: 15px"><span>缺报文件数</span>　<span>286</span></div></div>
+</div> 
+<div id="leftbottom" class="popup" style="font-size:12px;display: block">
+    <div class="close_button" onclick="close_popups('leftbottom')"><img src="./images/关闭2.png"></div>
+    <div style="float: left;position: absolute;left: 210px;top: 58px;color:#d5f6fd">
+        <span style="color:rgb(47,209,250);">GPS</span><br>
+        <span>获取文件数</span><br>
+        <span>12122个</span><br>
+        <span>入库情况</span><br>
+        <span>312条</span>
+    </div>
+    <div style="float: left;position: absolute;left: 290px;top: 58px;color:#d5f6fd">
+        <span style="color:rgb(47,209,250);">雷达</span><br>
+        <span>获取文件数</span><br>
+        <span>124个</span><br>
+        <span>入库情况</span><br>
+        <span>42条</span>
+    </div>
+    <div style="float: left;position: absolute;left: 370px;top: 58px;color:#d5f6fd">
+        <span style="color:rgb(47,209,250);">志愿船</span><br>
+        <span>获取文件数</span><br>
+        <span>521个</span><br>
+        <span>入库情况</span><br>
+        <span>172条</span>
+    </div>
+    <div style="float: left;position: absolute;left: 450px;top: 58px;color:#d5f6fd">
+        <span style="color:rgb(47,209,250);">浮标</span><br>
+        <span>获取文件数</span><br>
+        <span>1152个</span><br>
+        <span>入库情况</span><br>
+        <span>124条</span>
+    </div>
+</div>
+<div id="righttop"  class="popup" style="display: block">
+    <div style="position: relative;top: 30px;left: 45px;font-size: 13px;"><img style="float:left" src="http://p04gycm6e.bkt.clouddn.com/icon9.png"><div style="float:left;padding-top: 10px;padding-left:10px;"><span>运行正常</span></div></div>
+    <div class="close_button" onclick="close_popups('righttop')"><img src="./images/关闭2.png"></div>
+    <div class="center_img" ><img class="center_img" src="http://p04gycm6e.bkt.clouddn.com/c2.png"></div>
+    <div class="center_img" >
+        <span style=" position: absolute;top: -80px;left: -10px;font-size: 15px;color: rgb(47,209,250);">观测类型</span><span style="position: absolute;top: -60px;left: -10px;">志愿船</span>
+        <span style=" position: absolute;top: -117px;left: 113px;font-size: 1px;color: rgb(47,209,250);">获取文件数</span><span style="position: absolute;top: -117px;left: 189px;">2531</span>
+        <span style=" position: absolute;top: -32px;left: -10px;font-size: 15px;color: rgb(47,209,250);">位置</span><span style="position: absolute;top: -13px;left: -10px;">123,321</span>
+        <span style=" position: absolute;top: 18px;left: -10px;font-size: 15px;color: rgb(47,209,250);">通讯方式</span><span style="position: absolute;top: 36px;left: -10px;">CDMA</span>
+        <span style=" position: absolute;top: 29px;left: 84px;font-size: 15px;color: rgb(47,209,250);">风速</span><span style="position: absolute;top: 47px;left: 89px;">3.5</span>
+        <span style=" position: absolute;top: 29px;left: 150px;font-size: 15px;color: rgb(47,209,250);">海量</span><span style="position: absolute;top: 47px;left: 155px;">1.8</span>
+        <span style=" position: absolute;top: 29px;left: 217px;font-size: 15px;color: rgb(47,209,250);">湍流</span><span style="position: absolute;top: 47px;left: 222px;">4.3</span>
+    </div>
+  </div> 
+<div id="centertop"  class="popup" style="display: block">
+	<div id="centerinnertop1" onClick="window.open('http://p0l31go3f.bkt.clouddn.com/shujuliu.html');" class="popup" style="display: block">
+	数据流图
+	</div>
+	<div id="centerinnertop2"  class="popup" style="display: block">
+	全景机房
+	</div>
+</div>
+<div id="wai">
+      <div id="bottom_dock">
+        <div id="bottom_buttons">
+          <div class="bottom_button">
+            <a href="#">
+            <img class="button_icon" src="http://p04gycm6e.bkt.clouddn.com/icon2.png"><br/>
+            <span>报文服务器</span>
+            </a>
+          </div>
+          <div class="bottom_button">
+            <a href="#">
+            <img class="button_icon" src="http://p04gycm6e.bkt.clouddn.com/icon3.png"><br/>
+            <span>地面小站</span>
+            </a>
+          </div>
+          <div class="bottom_button">
+            <a href="#">
+            <img class="button_icon" src="http://p04gycm6e.bkt.clouddn.com/icon1.png"><br/>
+            <span>自动气象站</span>
+            </a>
+          </div>
+          <div class="bottom_button">
+            <a href="#">
+            <img class="button_icon" src="http://p04gycm6e.bkt.clouddn.com/icon4.png"><br/>
+            <span>卫星云图</span>
+            </a>
+          </div>
+          <div class="bottom_button">
+            <a href="#">
+            <img class="button_icon" src="http://p04gycm6e.bkt.clouddn.com/icon5.png"><br/>
+            <span>多普勒雷达</span>
+            </a>
+          </div>
+          <div class="bottom_button">
+            <a href="#">
+            <img class="button_icon" src="http://p04gycm6e.bkt.clouddn.com/icon6.png"><br/>
+            <span>Micaps数据</span>
+            </a>
+          </div>
+          <div class="bottom_button">
+            <a href="#">
+            <img class="button_icon" src="http://p04gycm6e.bkt.clouddn.com/icon7.png"><br/>
+            <span>数值模式产品</span>
+            </a>
+          </div>
+          <div class="bottom_button" style="margin-right: 0px">
+            <a href="#">
+            <img class="button_icon" src="http://p04gycm6e.bkt.clouddn.com/icon8.png"><br/>
+            <span>数值模式产品</span>
+            </a>
+          </div>
+        </div>
+      </div>
+  </div>
+</body>
+</html>
